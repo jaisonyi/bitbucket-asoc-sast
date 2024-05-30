@@ -15,7 +15,7 @@ REVISION_DATE = "2023-10-11"
 logger = get_logger()
 
 schema = {
-    'SCAN_NAME': {'type': 'string', 'required': False, 'default': "HCL_ASoC_SAST"},
+    'SCAN_NAME': {'type': 'string', 'required': False, 'default': "HCL_ASoC_SCA"},
     'DATACENTER': {'type': 'string', 'required': False, 'default': "NA"},
     'SECRET_SCANNING': {'type': 'boolean', 'required': False, 'default': False},
     'CONFIG_FILE_PATH': {'type': 'string', 'required': False, 'default': ""},
@@ -27,10 +27,10 @@ schema = {
     'DEBUG': {'type': 'boolean', 'required': False, 'default': False}
 }
 
-class AppScanOnCloudSAST(Pipe):
+class AppScanOnCloudSCA(Pipe):
     asoc = None
     
-    #Run SAST Scan Process
+    #Run SCA Scan Process
     def run(self):
         super().run()
         
@@ -71,7 +71,7 @@ class AppScanOnCloudSAST(Pipe):
         #self.code_insights = CodeInsights(self.repo, self.repoOwner, auth_type="authless")
 
         self.asoc = ASoC(apikey, self.datacenter)
-        logger.info("Executing Pipe: HCL AppScan on Cloud SAST")
+        logger.info("Executing Pipe: HCL AppScan on Cloud SCA")
         logger.info(f"\tVersion: {VERSION} rev {REVISION_DATE}")
         if(self.debug):
             logger.setLevel('DEBUG')
@@ -122,7 +122,7 @@ class AppScanOnCloudSAST(Pipe):
         logger.info(f"Copying [{self.cwd}] to [{targetDir}]")
         if(shutil.copytree(self.cloneDir, targetDir) is None):
             logger.error("Cannot copy build clone dir into target dir")
-            self.fail(message="Error Running ASoC SAST Pipeline")
+            self.fail(message="Error Running ASoC SCA Pipeline")
             return False
             
         #Create the saclient dir if it doesn not exist
@@ -134,11 +134,11 @@ class AppScanOnCloudSAST(Pipe):
                 logger.info(f"Created dir [{saclientPath}]")
             except:
                 logger.error(f"Error creating saclient path [{saclientPath}]")
-                self.fail(message="Error Running ASoC SAST Pipeline")
+                self.fail(message="Error Running ASoC SCA Pipeline")
                 return False
             if(not os.path.isdir(saclientPath)):
                 logger.error(f"Error creating saclient path [{saclientPath}]")
-                self.fail(message="Error Running ASoC SAST Pipeline")
+                self.fail(message="Error Running ASoC SCA Pipeline")
                 return False
                 
         #Create Reports Dir if it does not exist 
@@ -148,7 +148,7 @@ class AppScanOnCloudSAST(Pipe):
             os.mkdir(reportsDir)
             if(not os.path.isdir(reportsDir)):
                 logger.error(f"Cannot create reports dir! [{reportsDir}]")
-                self.fail(message="Error Running ASoC SAST Pipeline")
+                self.fail(message="Error Running ASoC SCA Pipeline")
                 return False
             else:
                 logger.info(f"Created dir [{reportsDir}]")
@@ -163,7 +163,7 @@ class AppScanOnCloudSAST(Pipe):
         appscanPath = self.getSAClient(saclientPath)
         if(appscanPath is None):
             logger.error("AppScan Path not found, something went wrong with SACLientUtil Download?")
-            self.fail(message="Error Running ASoC SAST Pipeline")
+            self.fail(message="Error Running ASoC SCA Pipeline")
             return False
         logger.info("========== Step 1: Complete =======================\n")
          
@@ -175,7 +175,7 @@ class AppScanOnCloudSAST(Pipe):
         irxPath = self.genIrx(scanName, appscanPath, targetDir, reportsDir, configFile, self.secret_scanning)
         if(irxPath is None):
             logger.error("IRX File Not Generated.")
-            self.fail(message="Error Running ASoC SAST Pipeline")
+            self.fail(message="Error Running ASoC SCA Pipeline")
             return False
         logger.info("========== Step 2: Complete =======================\n") 
         
@@ -184,7 +184,7 @@ class AppScanOnCloudSAST(Pipe):
         self.scanId = self.runScan(scanName, self.appid, irxPath, comment, True)
         if(self.scanId is None):
             logger.error("Error creating scan")
-            self.fail(message="Error Running ASoC SAST Pipeline")
+            self.fail(message="Error Running ASoC SCA Pipeline")
             return False
         logger.info("========== Step 3: Complete =======================\n")   
         
@@ -226,12 +226,12 @@ class AppScanOnCloudSAST(Pipe):
         report = self.getReport(self.scanId, reportPath, notes)
         if(report is None):
             logger.error("Error downloading report")
-            self.fail(message="Error Running ASoC SAST Pipeline")
+            self.fail(message="Error Running ASoC SCA Pipeline")
             return False
         logger.info(f"Report Downloaded [{reportPath}]")
         logger.info("========== Step 5: Complete =======================\n")
         
-        self.success(message="ASoC SAST Pipeline Complete")
+        self.success(message="ASoC SCA Pipeline Complete")
 
     def createSummaryReport(self, scanSummaryJson):
         """
@@ -330,7 +330,7 @@ class AppScanOnCloudSAST(Pipe):
         logger.error(f"IRX File does not exist [{irxPath}]")
         return None
     
-    #Create the SAST scan based on an IRX File
+    #Create the SCA scan based on an IRX File
     #If Wait=True the function will sleep until the scan is complete
     def runScan(self, scanName, appId, irxPath, comment="", wait=True):
         #Verify that ASoC is logged in, if not then login
@@ -406,7 +406,7 @@ class AppScanOnCloudSAST(Pipe):
 					"FixRecommendation": True,
 					"MinimizeDetails": True,
 					"ReportFileType": "Html",
-					"Title": "HCL ASoC SAST Security Report",
+					"Title": "HCL ASoC SCA Security Report",
                     "Notes": note
 				}
         }
@@ -463,7 +463,7 @@ class AppScanOnCloudSAST(Pipe):
     
         
 if __name__ == '__main__':
-    pipe = AppScanOnCloudSAST(pipe_metadata='/pipe.yml', schema=schema)
+    pipe = AppScanOnCloudSCA(pipe_metadata='/pipe.yml', schema=schema)
     pipe.run()
     
     
