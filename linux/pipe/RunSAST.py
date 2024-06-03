@@ -330,7 +330,7 @@ class AppScanOnCloudSAST(Pipe):
         logger.error(f"IRX File does not exist [{irxPath}]")
         return None
     
-    #Create the SAST Scan based on an IRX File
+    #Create the SAST scan based on an IRX File
     #If Wait=True the function will sleep until the scan is complete
     def runScan(self, scanName, appId, irxPath, comment="", wait=True):
         #Verify that ASoC is logged in, if not then login
@@ -465,18 +465,5 @@ class AppScanOnCloudSAST(Pipe):
 if __name__ == '__main__':
     pipe = AppScanOnCloudSAST(pipe_metadata='/pipe.yml', schema=schema)
     pipe.run()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
